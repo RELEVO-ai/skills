@@ -1,0 +1,11 @@
+{
+  "name": "@relevo/skills",
+  "version": "1.0.0",
+  "description": "RELEVO Skills CLI — install and sync team skills across agents",
+  "bin": {
+    "relevo-skills": "./relevo-skills.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
