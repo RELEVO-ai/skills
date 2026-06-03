@@ -1,55 +1,48 @@
 # RELEVO Skills
 
-Agent skills for the RELEVO SaaS Factory — reusable, versioned knowledge modules for Claude Code, OpenCode, Codex, Cursor, and any agent that supports the skills convention.
+Skills compartidas del equipo RELEVO — instalables en OpenCode, Claude Code, Codex, Cursor y cualquier agente compatible.
 
-## Install
+## Instalar
 
 ```bash
-npx skills add RELEVO-ai/skills
+npx @relevo/skills install payments-mercadopago
 ```
 
-Choose which skills to install. Each skill gets loaded into your agent automatically.
-
-## Catalog
-
-### Payments
-
-| Skill | Description | Version |
-|---|---|---|
-| [mercadopago](skills/payments/mercadopago/SKILL.md) | Payments & subscriptions with Mercado Pago. Webhook validation, subscription lifecycle, proration, recurring billing. | 1.0.0 |
-
-### Tooling
-
-| Skill | Description | Version |
-|---|---|---|
-| *(coming soon)* | | |
-
-### Notifications
-
-| Skill | Description | Version |
-|---|---|---|
-| *(coming soon)* | | |
-
-## Skill Structure
-
-Each skill follows this layout:
+Para que el agente lo descubra, se crea un symlink:
 
 ```
-skills/<category>/<name>/
-  SKILL.md        ← loaded by agent — domain rules, architecture, deployment
-  AGENTS.md       ← agent-specific quick-reference (rules in imperative form)
-  migrations/     ← SQL migrations (run once per project)
-  references/     ← detailed reference docs (API, schema, flows)
-  templates/      ← copy-paste code templates
-  utils/          ← shared utilities
+~/.config/opencode/skills/payments-mercadopago/  →  ~/.relevo/skills/payments-mercadopago/
+~/.claude/skills/payments-mercadopago/            →  ~/.relevo/skills/payments-mercadopago/
 ```
 
-## Contributing
+## Sincronizar
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+```bash
+npx @relevo/skills sync
+```
 
-## Nesting & Discovery
+## Publicar cambios
 
-Skills live in `skills/<category>/<name>/` for human browsability on GitHub. Agent installers use `skills.json` at the root to map skill names to paths — so `mercadopago` resolves to `skills/payments/mercadopago/SKILL.md` without the installer needing to walk the tree.
+```bash
+npx @relevo/skills publish
+```
 
-To add a new skill, add its entry to `skills.json` and open a PR.
+## Skills
+
+| Skill | Version | Description |
+|---|---|---|
+| payments-mercadopago | 1.0.0 | Mercado Pago payments & subscriptions |
+
+## Estructura
+
+```
+payments-mercadopago/       ← nombre plano, compatible con OpenCode
+  SKILL.md                  ← frontmatter + domain rules
+  AGENTS.md                 ← quick-reference rules
+  migrations/
+  references/
+  templates/
+  utils/
+cli/                        ← @relevo/skills CLI
+skills.json                 ← registro de skills disponibles
+```

@@ -1,5 +1,5 @@
 ---
-name: mercadopago
+name: payments-mercadopago
 category: payments
 description: "Mercado Pago payments & subscriptions integration. Use when the task involves MP payment processing, subscription management, webhook handling, proration, recurring billing, checkout preferences, or payment webhooks."
 version: "1.0.0"
