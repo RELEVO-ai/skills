@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "org": "RELEVO-ai",
+  "repo": "skills",
+  "skills": [
+    {
+      "name": "mercadopago",
+      "category": "payments",
+      "description": "Mercado Pago payments & subscriptions integration. Webhook validation, subscription lifecycle, proration, recurring billing.",
+      "path": "skills/payments/mercadopago/SKILL.md",
+      "version": "1.0.0",
+      "agents": ["claude-code", "opencode", "codex", "cursor", "cline", "copilot", "gemini-cli"],
+      "tags": ["payments", "subscriptions", "webhooks", "latam", "recurring-billing"],
+      "stack": ["supabase", "typescript", "edge-functions", "pg-cron"]
+    }
+  ]
+}

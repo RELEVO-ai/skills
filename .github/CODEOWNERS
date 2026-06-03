@@ -1,0 +1,8 @@
+# Global fallback — RELEVO core team reviews everything
+* @RELEVO-ai/core
+
+# Payments skills
+skills/payments/ @RELEVO-ai/core
+
+# Add per-skill owners as the team grows:
+# skills/payments/mercadopago/ @facundocornago
