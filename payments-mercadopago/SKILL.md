@@ -1,10 +1,11 @@
 ---
 name: payments-mercadopago
-category: payments
 description: "Mercado Pago payments & subscriptions integration. Use when the task involves MP payment processing, subscription management, webhook handling, proration, recurring billing, checkout preferences, or payment webhooks."
-version: "1.0.0"
-agents: ["claude-code", "opencode", "codex", "cursor", "cline", "copilot", "gemini-cli"]
-tags: ["payments", "subscriptions", "webhooks", "latam", "recurring-billing"]
+metadata:
+  category: payments
+  version: "1.0.0"
+  agents: claude-code, opencode, codex, cursor
+  tags: payments, subscriptions, webhooks, latam, recurring-billing
 ---
 
 # Mercado Pago Skill
@@ -64,12 +65,6 @@ tags: ["payments", "subscriptions", "webhooks", "latam", "recurring-billing"]
 - **Webhook delivery failure**: `webhook_retry` cron with exponential backoff. Each webhook has a `max_retries` (default 3) and `retry_count` with `next_retry_at`.
 - **HMAC validation failure**: Log and return 401. Do not process.
 
-## Migration
-
-| File | Content |
-|---|---|
-| `migrations/001_create_subscriptions_tables.sql` | Create all required tables in Supabase. Copy-paste into Supabase SQL Editor. |
-
 ## Reference Documents
 
 | File | Content |
@@ -80,6 +75,14 @@ tags: ["payments", "subscriptions", "webhooks", "latam", "recurring-billing"]
 | `references/pricing-logic.md` | Proration formulas and discount rules |
 | `references/database-schema.md` | Supabase schema: tables, indexes, RLS |
 | `references/checkout-flow.md` | Checkout preference creation flow |
+
+## Quick Flows
+
+Cada flow es autocontenido: incluye sus tablas, conexiones y pasos. Cargar solo cuando el task coincida:
+
+- **Agregar suscripciones** → [`flows-add-subscriptions.md`](references/flows-add-subscriptions.md) — tablas (subscriptions, discounts, transactions, events, checkout), secrets, deploy edge functions, cron schedules, webhook config
+- **Pago one-time** → [`flows-one-time-payments.md`](references/flows-one-time-payments.md) — tabla checkout_preferences, MP checkout preference, webhook processing
+- **Procesar webhook** → [`flows-webhook-processing.md`](references/flows-webhook-processing.md) — tabla webhook_log, HMAC validation, routing por topic, retry backoff
 
 ## Templates
 
@@ -94,46 +97,3 @@ tags: ["payments", "subscriptions", "webhooks", "latam", "recurring-billing"]
 | `templates/cron-unpaid-cleanup.ts` | subscription_unpaid_cleanup implementation |
 | `templates/cron-retry-payment.ts` | subscription_retry_payment implementation |
 
-## Deployment
-
-### 1. Run migration
-
-Copy `migrations/001_create_subscriptions_tables.sql` into Supabase SQL Editor and execute.
-
-### 2. Set environment variables
-
-```bash
-supabase secrets set MP_ACCESS_TOKEN=APP_USR-xxxxx
-supabase secrets set MP_WEBHOOK_SECRET=your_webhook_secret
-supabase secrets set APP_URL=https://your-app.com
-supabase secrets set WEBHOOK_URL=https://project.supabase.co/functions/v1
-```
-
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set automatically by Supabase Edge Functions runtime.
-
-### 3. Deploy Edge Functions
-
-```bash
-supabase functions deploy webhook-entry --no-verify-jwt
-supabase functions deploy cron-cycle-cancel --no-verify-jwt
-supabase functions deploy cron-cycle-end --no-verify-jwt
-supabase functions deploy cron-discount-end --no-verify-jwt
-supabase functions deploy cron-unpaid-cleanup --no-verify-jwt
-supabase functions deploy cron-retry-payment --no-verify-jwt
-```
-
-### 4. Configure cron schedules
-
-```sql
-SELECT cron.schedule('subscription-cycle-cancel',  '5 0 * * *',    $$SELECT net.http_post(url:='https://project.supabase.co/functions/v1/cron-cycle-cancel',    headers:='{"Authorization":"Bearer SERVICE_ROLE_KEY"}'::jsonb)$$);
-SELECT cron.schedule('subscription-cycle-end',     '0 0 * * *',    $$SELECT net.http_post(url:='https://project.supabase.co/functions/v1/cron-cycle-end',     headers:='{"Authorization":"Bearer SERVICE_ROLE_KEY"}'::jsonb)$$);
-SELECT cron.schedule('subscription-discount-end',  '10 0 * * *',   $$SELECT net.http_post(url:='https://project.supabase.co/functions/v1/cron-discount-end',  headers:='{"Authorization":"Bearer SERVICE_ROLE_KEY"}'::jsonb)$$);
-SELECT cron.schedule('subscription-unpaid-cleanup','0 */6 * * *',   $$SELECT net.http_post(url:='https://project.supabase.co/functions/v1/cron-unpaid-cleanup',headers:='{"Authorization":"Bearer SERVICE_ROLE_KEY"}'::jsonb)$$);
-SELECT cron.schedule('subscription-retry-payment', '0 12 * * *',   $$SELECT net.http_post(url:='https://project.supabase.co/functions/v1/cron-retry-payment', headers:='{"Authorization":"Bearer SERVICE_ROLE_KEY"}'::jsonb)$$);
-```
-
-### 5. Configure webhooks in MP
-
-In [Tus integraciones](https://mercadopago.com.ar/developers/panel/app):
-- Webhook URL: `https://project.supabase.co/functions/v1/webhook-entry`
-- Topics: `payment`, `subscription_preapproval`, `subscription_authorized_payment`, `subscription_preapproval_plan`
