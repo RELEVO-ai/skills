@@ -65,7 +65,7 @@ metadata:
 - **Webhook delivery failure**: `webhook_retry` cron with exponential backoff. Each webhook has a `max_retries` (default 3) and `retry_count` with `next_retry_at`.
 - **HMAC validation failure**: Log and return 401. Do not process.
 
-## Reference Documents
+## Reference Documents (cargar bajo demanda)
 
 | File | Content |
 |---|---|
@@ -78,11 +78,11 @@ metadata:
 
 ## Quick Flows
 
-Cada flow es autocontenido: incluye sus tablas, conexiones y pasos. Cargar solo cuando el task coincida:
+Cada flow referencia recursos pesados (schemas, handlers, endpoints) como prerequisitos opcionales. El agente los carga solo si hace falta.
 
-- **Agregar suscripciones** → [`flows-add-subscriptions.md`](references/flows-add-subscriptions.md) — tablas (subscriptions, discounts, transactions, events, checkout), secrets, deploy edge functions, cron schedules, webhook config
-- **Pago one-time** → [`flows-one-time-payments.md`](references/flows-one-time-payments.md) — tabla checkout_preferences, MP checkout preference, webhook processing
-- **Procesar webhook** → [`flows-webhook-processing.md`](references/flows-webhook-processing.md) — tabla webhook_log, HMAC validation, routing por topic, retry backoff
+- **Agregar suscripciones** → [`flows-add-subscriptions.md`](references/flows-add-subscriptions.md)
+- **Pago one-time** → [`flows-one-time-payments.md`](references/flows-one-time-payments.md)
+- **Procesar webhook** → [`flows-webhook-processing.md`](references/flows-webhook-processing.md)
 
 ## Templates
 
