@@ -1,0 +1,33 @@
+name: Publish CLI to npm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cli/**'
+  workflow_dispatch: {}   # permite correrlo a mano (ej. para publicar la versión actual)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish if version is new
+        working-directory: cli
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION ya está publicado — skip."
+          else
+            echo "Publicando $NAME@$VERSION..."
+            npm publish
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
