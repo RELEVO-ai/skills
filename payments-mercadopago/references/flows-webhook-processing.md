@@ -24,10 +24,10 @@ MP POST → webhook-entry
   ├── Return 200 OK (< 22s)
   |
   └── Async process (switch body.type):
-        ├── 'payment'                     → GET /v1/payments/{id}
-        ├── 'subscription_preapproval'    → GET /preapproval/{id}
-        ├── 'subscription_authorized_payment' → GET /authorized_payments/{id}
-        └── 'subscription_preapproval_plan'   → GET /preapproval_plan/{id}
+        ├── 'payment'                     → bash scripts/get-payment.sh --id {id}
+        ├── 'subscription_preapproval'    → bash scripts/get-preapproval.sh --id {id}
+        ├── 'subscription_authorized_payment' → bash scripts/get-authorized-payment.sh --id {id}
+        └── 'subscription_preapproval_plan'   → bash scripts/get-preapproval.sh --id {id}
 ```
 
 ## Retry backoff

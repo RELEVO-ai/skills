@@ -45,4 +45,11 @@ SELECT cron.schedule('subscription-retry-payment', '0 12 * * *',   $$SELECT net.
 - URL: `https://project.supabase.co/functions/v1/webhook-entry`
 - Topics: `payment`, `subscription_preapproval`, `subscription_authorized_payment`, `subscription_preapproval_plan`
 
-5. Crear plan → redirect a `init_point` → webhook confirma → activar
+5. Crear plan:
+```bash
+bash scripts/create-preapproval-plan.sh \
+  --reason "Premium Mensual" \
+  --amount 1000 \
+  --external-ref "sub_$(uuidgen | tr -d - | head -c 12)"
+```
+→ redirect a `init_point` → webhook confirma → activar

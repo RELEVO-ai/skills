@@ -86,6 +86,21 @@ Cada flow referencia recursos pesados (schemas, handlers, endpoints) como prereq
 - **Pago one-time** → [`flows-one-time-payments.md`](references/flows-one-time-payments.md)
 - **Procesar webhook** → [`flows-webhook-processing.md`](references/flows-webhook-processing.md)
 
+## Scripts (ejecutables por el agente)
+
+| Script | Acción |
+|--------|--------|
+| `scripts/create-preapproval-plan.sh` | Crear plan de suscripción en MP |
+| `scripts/create-checkout-preference.sh` | Crear preferencia de pago one-time |
+| `scripts/get-payment.sh` | Obtener payment enriquecido por ID |
+| `scripts/get-preapproval.sh` | Obtener preapproval (suscripción) por ID |
+| `scripts/get-authorized-payment.sh` | Obtener authorized payment (cobro recurrente) |
+| `scripts/cancel-preapproval.sh` | Cancelar suscripción en MP |
+| `scripts/update-preapproval-price.sh` | Actualizar precio de suscripción |
+| `scripts/search-preapproval.sh` | Buscar suscripciones por filtros |
+
+Todos usan `$MP_ACCESS_TOKEN` del entorno o `--access-token`. Soportan `--dry-run` y `--help`.
+
 ## Templates
 
 | File | Content |

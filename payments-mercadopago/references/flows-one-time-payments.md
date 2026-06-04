@@ -23,20 +23,14 @@ supabase functions deploy webhook-entry --no-verify-jwt
 3. Configurar webhook en MP (topic: `payment`) apuntando a `webhook-entry`
 
 4. Crear preferencia:
-```
-POST /checkout/preferences
-{
-  "items": [{
-    "title": "Producto",
-    "quantity": 1,
-    "unit_price": 1000.00,
-    "currency_id": "ARS"
-  }],
-  "external_reference": "order_abc123",
-  "notification_url": "https://project.supabase.co/functions/v1/webhook-entry",
-  "back_urls": { "success": "...", "failure": "...", "pending": "..." },
-  "auto_return": "approved"
-}
+```bash
+bash scripts/create-checkout-preference.sh \
+  --title "Producto" \
+  --amount 1000 \
+  --external-ref "order_abc123" \
+  --notification-url "https://project.supabase.co/functions/v1/webhook-entry" \
+  --success-url "https://mysite.com/success" \
+  --failure-url "https://mysite.com/failure"
 ```
 
 5. Insertar `checkout_preferences` local con `preference_id` e `init_point`
