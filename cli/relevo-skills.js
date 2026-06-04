@@ -46,7 +46,6 @@ function getSkills() {
 }
 
 function install(name, agents) {
-  ensureRepo();
   const source = path.join(SKILLS_REPO, name);
   if (!fs.existsSync(source)) {
     console.error(`Skill "${name}" not found. Available: ${getSkills().join(', ')}`);
@@ -101,8 +100,12 @@ const args = process.argv.slice(3);
 
 switch (cmd) {
   case 'install':
-    if (!args[0]) { console.error('Usage: relevo-skills install <name> [agent...]'); process.exit(1); }
-    install(args[0], args.slice(1));
+    ensureRepo();
+    if (args[0]) {
+      install(args[0], args.slice(1));
+    } else {
+      for (const s of getSkills()) install(s);
+    }
     break;
   case 'sync':
     sync();
@@ -115,5 +118,5 @@ switch (cmd) {
     console.log(getSkills().join('\n'));
     break;
   default:
-    console.log('Commands:\n  install <name> [agent...]  Clone repo + symlink skill\n  sync                      Pull updates + restore symlinks\n  publish                   Commit & push changes\n  list                      Show available skills');
+    console.log('Commands:\n  install [name] [agent...]  Clone repo + symlink skill(s). Omit name for all.\n  sync                       Pull updates + restore symlinks\n  publish                    Commit & push changes\n  list                       Show available skills');
 }
