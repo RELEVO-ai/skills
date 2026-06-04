@@ -1,7 +1,7 @@
 {
   "name": "@relevo/skills",
-  "version": "1.2.0",
-  "description": "RELEVO Skills CLI — install and sync team skills across agents",
+  "version": "2.0.0",
+  "description": "RELEVO Skills CLI — symlinks team skills into every agent's skills folder (cross-OS)",
   "bin": {
     "relevo-skills": "./relevo-skills.js"
   },

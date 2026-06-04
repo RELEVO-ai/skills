@@ -1,36 +1,43 @@
 #!/usr/bin/env node
 const { execSync } = require('child_process');
+const os = require('os');
 const path = require('path');
 const fs = require('fs');
 
 const REPO_URL_SSH = 'git@github.com:RELEVO-ai/skills.git';
 const REPO_URL_HTTPS = 'https://github.com/RELEVO-ai/skills.git';
-const SKILLS_REPO = path.resolve(process.env.HOME, '.relevo/skills');
-const AGENTS = {
-  opencode: path.resolve(process.env.HOME, '.config/opencode/skills'),
-  'claude-code': path.resolve(process.env.HOME, '.claude/skills'),
-  codex: path.resolve(process.env.HOME, '.codex/skills'),
-  cursor: path.resolve(process.env.HOME, '.cursor/skills'),
-};
+const HOME = os.homedir();
+const SKILLS_REPO = path.join(HOME, '.relevo', 'skills');
+
+// Carpetas globales de skills que escanean los agentes. Estos 4 targets cubren
+// ~13 agentes (research en references/cross-agent-support.md de skill-authoring):
+//   .agents/skills        → Zed, OpenCode, Gemini, Amp, Cursor, Cline, Warp, Antigravity, Copilot
+//   .claude/skills        → Claude Code
+//   .codex/skills         → Codex
+//   .config/agents/skills → Kimi, Amp (alt)
+// os.homedir() + path.join → funciona igual en macOS/Linux/Windows.
+const SKILL_DIRS = [
+  path.join(HOME, '.agents', 'skills'),
+  path.join(HOME, '.claude', 'skills'),
+  path.join(HOME, '.codex', 'skills'),
+  path.join(HOME, '.config', 'agents', 'skills'),
+];
+// En Windows el symlink de carpeta requiere 'junction' (no pide admin).
+const LINK_TYPE = process.platform === 'win32' ? 'junction' : 'dir';
 
 function run(cmd, opts = {}) {
-  try {
-    execSync(cmd, { stdio: 'inherit', ...opts });
-  } catch {}
-
+  try { execSync(cmd, { stdio: 'inherit', ...opts }); } catch {}
 }
 
 function cloneRepo() {
   console.log('Cloning RELEVO-ai/skills...');
   try {
-    execSync(`git clone ${REPO_URL_SSH} '${SKILLS_REPO}'`, { stdio: 'inherit' });
+    execSync(`git clone ${REPO_URL_SSH} "${SKILLS_REPO}"`, { stdio: 'inherit' });
   } catch {
-    console.log('SSH failed, trying gh CLI...');
     try {
-      execSync(`gh repo clone RELEVO-ai/skills '${SKILLS_REPO}'`, { stdio: 'inherit' });
+      execSync(`gh repo clone RELEVO-ai/skills "${SKILLS_REPO}"`, { stdio: 'inherit' });
     } catch {
-      console.log('gh CLI failed, trying HTTPS...');
-      execSync(`git clone ${REPO_URL_HTTPS} '${SKILLS_REPO}'`, { stdio: 'inherit' });
+      execSync(`git clone ${REPO_URL_HTTPS} "${SKILLS_REPO}"`, { stdio: 'inherit' });
     }
   }
 }
@@ -40,51 +47,47 @@ function ensureRepo() {
 }
 
 function getSkills() {
-  const dirs = fs.readdirSync(SKILLS_REPO, { withFileTypes: true });
-  return dirs.filter(d => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'cli')
-             .map(d => d.name);
+  return fs.readdirSync(SKILLS_REPO, { withFileTypes: true })
+    .filter(d => d.isDirectory() && !d.name.startsWith('.') && d.name !== 'cli')
+    .map(d => d.name);
 }
 
-function install(name, agents) {
+function linkSkill(name) {
   const source = path.join(SKILLS_REPO, name);
   if (!fs.existsSync(source)) {
     console.error(`Skill "${name}" not found. Available: ${getSkills().join(', ')}`);
     process.exit(1);
   }
-
-  const targets = agents || Object.keys(AGENTS);
-  for (const agent of targets) {
-    const dir = AGENTS[agent];
-    if (!dir) { console.warn(`Unknown agent: ${agent}`); continue; }
-
+  for (const dir of SKILL_DIRS) {
     const link = path.join(dir, name);
     fs.mkdirSync(dir, { recursive: true });
     try {
       const s = fs.lstatSync(link);
       if (s.isSymbolicLink() || s.isDirectory()) fs.rmSync(link, { recursive: true, force: true });
     } catch {}
-    fs.symlinkSync(source, link);
-    console.log(`  + ${agent}/${name}`);
+    try {
+      fs.symlinkSync(source, link, LINK_TYPE);
+      console.log(`  + ${link}`);
+    } catch (e) {
+      console.warn(`  ! no pude linkear ${link}: ${e.message}`);
+    }
   }
 }
 
 function sync() {
   ensureRepo();
   run('git pull --ff-only', { cwd: SKILLS_REPO });
-
   for (const name of getSkills()) {
     const source = path.join(SKILLS_REPO, name);
-    for (const [agent, dir] of Object.entries(AGENTS)) {
+    for (const dir of SKILL_DIRS) {
       const link = path.join(dir, name);
       try {
         const s = fs.lstatSync(link);
-        if (!s.isSymbolicLink()) continue;
-        if (fs.readlinkSync(link) !== source) continue;
-      } catch {
-        fs.mkdirSync(dir, { recursive: true });
-        fs.symlinkSync(source, link);
-        console.log(`  + ${agent}/${name} (restored)`);
-      }
+        if (s.isSymbolicLink() && fs.readlinkSync(link) === source) continue;
+      } catch {}
+      fs.mkdirSync(dir, { recursive: true });
+      try { fs.rmSync(link, { recursive: true, force: true }); } catch {}
+      try { fs.symlinkSync(source, link, LINK_TYPE); console.log(`  + ${link} (restored)`); } catch {}
     }
   }
 }
@@ -101,22 +104,18 @@ const args = process.argv.slice(3);
 switch (cmd) {
   case 'install':
     ensureRepo();
-    if (args[0]) {
-      install(args[0], args.slice(1));
-    } else {
-      for (const s of getSkills()) install(s);
-    }
+    if (args[0]) linkSkill(args[0]);
+    else for (const s of getSkills()) linkSkill(s);
     break;
-  case 'sync':
-    sync();
-    break;
-  case 'publish':
-    publish();
-    break;
-  case 'list':
-    ensureRepo();
-    console.log(getSkills().join('\n'));
-    break;
+  case 'sync': sync(); break;
+  case 'publish': publish(); break;
+  case 'list': ensureRepo(); console.log(getSkills().join('\n')); break;
   default:
-    console.log('Commands:\n  install [name] [agent...]  Clone repo + symlink skill(s). Omit name for all.\n  sync                       Pull updates + restore symlinks\n  publish                    Commit & push changes\n  list                       Show available skills');
+    console.log([
+      'Commands:',
+      '  install [name]   Symlink skill(s) a las carpetas de todos los agentes. Sin name = todas.',
+      '  sync             git pull + restaurar symlinks',
+      '  publish          git add/commit/push',
+      '  list             Skills disponibles',
+    ].join('\n'));
 }

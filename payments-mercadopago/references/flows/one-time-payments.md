@@ -4,9 +4,9 @@
 
 | Recurso | Cargar si... |
 |---------|-------------|
-| [`schema-checkout-preferences.md`](schema-checkout-preferences.md) | La tabla checkout_preferences no está creada |
-| [`api-endpoints.md`](api-endpoints.md) | Necesitás los endpoints de checkout/preferences |
-| [`webhook-handlers.md`](webhook-handlers.md) | Necesitás el handler de payment webhook |
+| [`../../migrations/005_checkout_preferences.sql`](../../migrations/005_checkout_preferences.sql) | La tabla checkout_preferences no está creada (requiere `001`) |
+| [`../api/response-fields.md`](../api/response-fields.md) | Necesitás qué devuelve payment/preference |
+| [`../handlers.md`](../handlers.md) | Necesitás el handler de payment webhook |
 
 ## Pasos
 

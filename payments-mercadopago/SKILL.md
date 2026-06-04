@@ -14,20 +14,20 @@ metadata:
 
 ### Named Systems (entry points del sistema)
 
-| System | Type | Responsibility |
-|---|---|---|
-| `webhook_entry` | Edge Function | Unico endpoint que recibe webhooks. Valida HMAC x-signature, rutea al handler |
-| `webhook_retry` | Table + Cron | Tabla `webhook_log`. Cron reintenta status='received' con backoff (5min/15min/60min, max 3) |
-| `subscription_cycle_end` | Cron (diario) | Subscriptions donde `billing_cycle_end < now()` y `status = active` (sin cancel). Renueva ciclo o marca grace período |
-| `subscription_cycle_cancel` | Cron (diario) | Subscriptions con `status = cancel_pending` y ciclo a menos de 24h → cancel en MP |
-| `subscription_payment_failed` | Handler | Pago recurrente falla. Registra intento, max retries → cancela + notifica |
-| `subscription_payment_succeeded` | Handler | Pago recurrente exitoso. Actualiza `billing_cycle_end`, registra transaction |
-| `subscription_cancelled_externally` | Handler | Usuario cancela desde MP. Detecta via webhook y sincroniza |
-| `subscription_upgrade` | Flow | Calcula proracion, genera checkout preference, actualiza precio |
-| `subscription_downgrade` | Flow | Sin reembolso. Actualiza precio para proximo ciclo |
-| `subscription_discount_end` | Cron (diario) | Lee `subscription_discounts` activos, restaura `current_price` a `original_price` |
-| `subscription_unpaid_cleanup` | Cron (c/6h) | Preapproval_plans sin preapproval_id >24h → eliminar |
-| `subscription_retry_payment` | Cron (diario) | Reintentar cobro a subscriptions `past_due` con `retry_count < max` |
+| System                              | Type          | Responsibility                                                                                                        |
+| ----------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `webhook_entry`                     | Edge Function | Unico endpoint que recibe webhooks. Valida HMAC x-signature, rutea al handler                                         |
+| `webhook_retry`                     | Table + Cron  | Tabla `webhook_log`. Cron reintenta status='received' con backoff (5min/15min/60min, max 3)                           |
+| `subscription_cycle_end`            | Cron (diario) | Subscriptions donde `billing_cycle_end < now()` y `status = active` (sin cancel). Renueva ciclo o marca grace período |
+| `subscription_cycle_cancel`         | Cron (diario) | Subscriptions con `status = cancel_pending` y ciclo a menos de 24h → cancel en MP                                     |
+| `subscription_payment_failed`       | Handler       | Pago recurrente falla. Registra intento, max retries → cancela + notifica                                             |
+| `subscription_payment_succeeded`    | Handler       | Pago recurrente exitoso. Actualiza `billing_cycle_end`, registra transaction                                          |
+| `subscription_cancelled_externally` | Handler       | Usuario cancela desde MP. Detecta via webhook y sincroniza                                                            |
+| `subscription_upgrade`              | Flow          | Calcula proracion, genera checkout preference, actualiza precio                                                       |
+| `subscription_downgrade`            | Flow          | Sin reembolso. Actualiza precio para proximo ciclo                                                                    |
+| `subscription_discount_end`         | Cron (diario) | Lee `subscription_discounts` activos, restaura `current_price` a `original_price`                                     |
+| `subscription_unpaid_cleanup`       | Cron (c/6h)   | Preapproval_plans sin preapproval_id >24h → eliminar                                                                  |
+| `subscription_retry_payment`        | Cron (diario) | Reintentar cobro a subscriptions `past_due` con `retry_count < max`                                                   |
 
 ## Domain Rules (CRITICAL)
 
@@ -67,37 +67,35 @@ metadata:
 
 ## Reference Documents (cargar bajo demanda)
 
-| File | Content |
+| File | Cargar si… |
 |---|---|
-| `references/api-endpoints.md` | MP API endpoints used by the skill |
-| `references/webhook-handlers.md` | Detailed webhook handler logic per topic |
-| `references/cron-jobs.md` | Complete cron job specifications |
-| `references/pricing-logic.md` | Proration formulas and discount rules |
-| `references/schema-subscriptions-core.md` | Tablas: subscriptions, discounts, transactions, events |
-| `references/schema-checkout-preferences.md` | Tabla: checkout_preferences |
-| `references/schema-webhook-log.md` | Tabla: webhook_log |
-| `references/checkout-flow.md` | Checkout preference creation flow |
+| [`references/crons.md`](references/crons.md) | Deployás o debuggeás crons |
+| [`references/handlers.md`](references/handlers.md) | Procesás o debuggeás webhooks |
+| [`references/api/response-fields.md`](references/api/response-fields.md) | Necesitás qué devuelve un GET de MP |
+| [`references/api/endpoints.md`](references/api/endpoints.md) | Necesitás un endpoint sin script (oauth, refunds, plan…) |
+| [`references/pricing.md`](references/pricing.md) | Necesitás fórmulas de proración / reglas de descuento |
+| [`migrations/`](migrations/) (un `.sql` por tabla, `001`–`006`) | La DB no está creada o necesitás el DDL de una tabla |
 
 ## Quick Flows
 
 Cada flow referencia recursos pesados (schemas, handlers, endpoints) como prerequisitos opcionales. El agente los carga solo si hace falta.
 
-- **Agregar suscripciones** → [`flows-add-subscriptions.md`](references/flows-add-subscriptions.md)
-- **Pago one-time** → [`flows-one-time-payments.md`](references/flows-one-time-payments.md)
-- **Procesar webhook** → [`flows-webhook-processing.md`](references/flows-webhook-processing.md)
+- **Agregar suscripciones** → [`flows/add-subscriptions.md`](references/flows/add-subscriptions.md)
+- **Pago one-time** → [`flows/one-time-payments.md`](references/flows/one-time-payments.md)
+- **Procesar webhook** → [`flows/webhook-processing.md`](references/flows/webhook-processing.md)
 
 ## Scripts (ejecutables por el agente)
 
-| Script | Acción |
-|--------|--------|
-| `scripts/create-preapproval-plan.sh` | Crear plan de suscripción en MP |
-| `scripts/create-checkout-preference.sh` | Crear preferencia de pago one-time |
-| `scripts/get-payment.sh` | Obtener payment enriquecido por ID |
-| `scripts/get-preapproval.sh` | Obtener preapproval (suscripción) por ID |
-| `scripts/get-authorized-payment.sh` | Obtener authorized payment (cobro recurrente) |
-| `scripts/cancel-preapproval.sh` | Cancelar suscripción en MP |
-| `scripts/update-preapproval-price.sh` | Actualizar precio de suscripción |
-| `scripts/search-preapproval.sh` | Buscar suscripciones por filtros |
+| Script                                  | Acción                                        |
+| --------------------------------------- | --------------------------------------------- |
+| `scripts/create-preapproval-plan.sh`    | Crear plan de suscripción en MP               |
+| `scripts/create-checkout-preference.sh` | Crear preferencia de pago one-time            |
+| `scripts/get-payment.sh`                | Obtener payment enriquecido por ID            |
+| `scripts/get-preapproval.sh`            | Obtener preapproval (suscripción) por ID      |
+| `scripts/get-authorized-payment.sh`     | Obtener authorized payment (cobro recurrente) |
+| `scripts/cancel-preapproval.sh`         | Cancelar suscripción en MP                    |
+| `scripts/update-preapproval-price.sh`   | Actualizar precio de suscripción              |
+| `scripts/search-preapproval.sh`         | Buscar suscripciones por filtros              |
 
 Todos usan `$MP_ACCESS_TOKEN` del entorno o `--access-token`. Soportan `--dry-run` y `--help`.
 
@@ -106,6 +104,7 @@ Todos usan `$MP_ACCESS_TOKEN` del entorno o `--access-token`. Soportan `--dry-ru
 | File | Content |
 |---|---|
 | `templates/webhook-entry.ts` | Entry point Edge Function with HMAC validation + routing |
+| `templates/webhook-handlers.ts` | Handler logic per topic (payment, preapproval, authorized_payment, outcomes) |
 | `templates/subscription-service.ts` | Shareable subscription CRUD + MP sync |
 | `templates/pricing-calculator.ts` | Proration, discount, upgrade/downgrade calculator |
 | `templates/cron-cycle-cancel.ts` | subscription_cycle_cancel implementation |
@@ -113,4 +112,5 @@ Todos usan `$MP_ACCESS_TOKEN` del entorno o `--access-token`. Soportan `--dry-ru
 | `templates/cron-discount-end.ts` | subscription_discount_end implementation |
 | `templates/cron-unpaid-cleanup.ts` | subscription_unpaid_cleanup implementation |
 | `templates/cron-retry-payment.ts` | subscription_retry_payment implementation |
+| `templates/cron-webhook-retry.ts` | webhook_retry implementation |
 

@@ -8,16 +8,19 @@ Skills compartidas del equipo RELEVO basadas en el estándar [Agent Skills](http
 npx @relevo/skills install
 ```
 
-Clona el repo + crea symlinks en todos los agentes (opencode, claude-code, codex, cursor).
+Clona el repo a `~/.relevo/skills` y **symlinkea** cada skill a las 4 carpetas globales que escanean los agentes (cubre ~13 agentes), igual en macOS/Linux/Windows:
+- `~/.agents/skills/` → Zed, OpenCode, Gemini, Amp, Cursor, Cline, Warp, Antigravity, Copilot
+- `~/.claude/skills/` → Claude Code
+- `~/.codex/skills/` → Codex
+- `~/.config/agents/skills/` → Kimi, Amp (alt)
+
+El discovery es **por carpeta**, no por AGENTS.md.
 
 ```bash
-npx @relevo/skills install <skill-name>
-```
-
-```bash
-npx @relevo/skills sync    # git pull + restore symlinks
-npx @relevo/skills publish # git add/commit/push
-npx @relevo/skills list    # skills disponibles
+npx @relevo/skills install <skill-name>   # solo una skill
+npx @relevo/skills sync                    # git pull + restaurar symlinks
+npx @relevo/skills publish                 # git add/commit/push
+npx @relevo/skills list                    # skills disponibles
 ```
 
 ---

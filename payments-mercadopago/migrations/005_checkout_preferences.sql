@@ -1,6 +1,4 @@
-# Schema: Checkout Preferences
-
-```sql
+-- 005_checkout_preferences.sql — tracking de cobros one-time / upgrade. FK → subscriptions (set null). Requiere 001.
 create table if not exists public.checkout_preferences (
   id uuid primary key default gen_random_uuid(),
   preference_id text not null unique,
@@ -21,4 +19,3 @@ create table if not exists public.checkout_preferences (
 create index if not exists idx_checkout_subscription on public.checkout_preferences(subscription_id);
 create index if not exists idx_checkout_preference on public.checkout_preferences(preference_id);
 create index if not exists idx_checkout_status on public.checkout_preferences(status);
-```

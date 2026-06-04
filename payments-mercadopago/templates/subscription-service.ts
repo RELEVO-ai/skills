@@ -1,7 +1,7 @@
 // subscription-service.ts — Shared logic for subscription CRUD and MP sync
 // Can be used by webhook handlers, cron jobs, and API endpoints
 
-import { calculateUpgradeProration, type CycleInfo } from '../pricing-calculator.ts';
+import { calculateUpgradeProration, type CycleInfo } from './pricing-calculator.ts';
 
 export interface Subscription {
   id: string;
