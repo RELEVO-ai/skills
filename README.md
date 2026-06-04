@@ -5,18 +5,25 @@ Skills compartidas del equipo RELEVO.
 ## Instalar una skill
 
 ```bash
-git clone https://github.com/RELEVO-ai/skills.git ~/.relevo/skills
-ln -s ~/.relevo/skills/payments-mercadopago ~/.config/opencode/skills/payments-mercadopago
+npx @relevo/skills install payments-mercadopago
 ```
 
-## Sincronizar
+Clona el repo si no existe + crea symlinks en todos los agentes compatibles (opencode, claude-code, codex, cursor).
+
+## Sincronizar actualizaciones
 
 ```bash
-cd ~/.relevo/skills && git pull
+npx @relevo/skills sync
 ```
 
-## Publicar cambios
+## Publicar cambios locales
 
 ```bash
-cd ~/.relevo/skills && git add . && git commit -m "..." && git push
+npx @relevo/skills publish
+```
+
+## Skills disponibles
+
+```bash
+npx @relevo/skills list
 ```
