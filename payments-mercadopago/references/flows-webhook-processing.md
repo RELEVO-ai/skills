@@ -4,7 +4,7 @@
 
 | Recurso | Cargar si... |
 |---------|-------------|
-| [`database-schema.md`](database-schema.md) | Necesitás la tabla webhook_log |
+| [`schema-webhook-log.md`](schema-webhook-log.md) | La tabla webhook_log no está creada |
 | [`webhook-handlers.md`](webhook-handlers.md) | Necesitás el código TypeScript de handlers + HMAC |
 | [`api-endpoints.md`](api-endpoints.md) | Necesitás los endpoints de enrich (payments, preapproval, authorized_payments) |
 
@@ -12,17 +12,17 @@
 
 ```
 MP POST → webhook-entry
-  │
+  |
   ├── Validar HMAC x-signature (x-request-id + data.id de query params)
-  │     └── fail → 401
-  │
+  |     └── fail → 401
+  |
   ├── Idempotency: webhook_log PK = "{type}:{action}:{data.id}:{notification_id}"
-  │     └── existe → 200 (skip)
-  │
+  |     └── existe → 200 (skip)
+  |
   ├── INSERT webhook_log (status='received')
-  │
+  |
   ├── Return 200 OK (< 22s)
-  │
+  |
   └── Async process (switch body.type):
         ├── 'payment'                     → GET /v1/payments/{id}
         ├── 'subscription_preapproval'    → GET /preapproval/{id}

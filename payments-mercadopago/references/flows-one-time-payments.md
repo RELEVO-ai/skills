@@ -4,7 +4,7 @@
 
 | Recurso | Cargar si... |
 |---------|-------------|
-| [`database-schema.md`](database-schema.md) | Necesitás la tabla checkout_preferences |
+| [`schema-checkout-preferences.md`](schema-checkout-preferences.md) | La tabla checkout_preferences no está creada |
 | [`api-endpoints.md`](api-endpoints.md) | Necesitás los endpoints de checkout/preferences |
 | [`webhook-handlers.md`](webhook-handlers.md) | Necesitás el handler de payment webhook |
 

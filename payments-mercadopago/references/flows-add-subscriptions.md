@@ -4,7 +4,8 @@
 
 | Recurso | Cargar si... |
 |---------|-------------|
-| [`database-schema.md`](database-schema.md) | La DB no está creada (tablas: subscriptions, subscription_discounts, subscription_transactions, subscription_events, checkout_preferences) |
+| [`schema-subscriptions-core.md`](schema-subscriptions-core.md) | La DB de suscripciones no está creada |
+| [`schema-checkout-preferences.md`](schema-checkout-preferences.md) | Necesitás la tabla de proración/upgrades |
 | [`api-endpoints.md`](api-endpoints.md) | Necesitás los endpoints exactos de MP |
 | [`cron-jobs.md`](cron-jobs.md) | Necesitás deployar o debuggear crons |
 | [`checkout-flow.md`](checkout-flow.md) | Necesitás el detalle de create/upgrade/downgrade/cancel |

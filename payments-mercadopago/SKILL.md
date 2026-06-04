@@ -73,7 +73,9 @@ metadata:
 | `references/webhook-handlers.md` | Detailed webhook handler logic per topic |
 | `references/cron-jobs.md` | Complete cron job specifications |
 | `references/pricing-logic.md` | Proration formulas and discount rules |
-| `references/database-schema.md` | Supabase schema: tables, indexes, RLS |
+| `references/schema-subscriptions-core.md` | Tablas: subscriptions, discounts, transactions, events |
+| `references/schema-checkout-preferences.md` | Tabla: checkout_preferences |
+| `references/schema-webhook-log.md` | Tabla: webhook_log |
 | `references/checkout-flow.md` | Checkout preference creation flow |
 
 ## Quick Flows
